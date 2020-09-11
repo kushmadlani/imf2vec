@@ -26,7 +26,6 @@ class Item2Vec:
         self.window_size = window_size
         self.embedding_size = embedding_size    
         self.embedding_matrix, self.items = self.get_embedding()
-        # self.S, self.top_k = self.similarity()
 
     def get_embedding(self):
         """Generate word2vec style embeddings trained on sequences of events using Skip-gram loss"""
@@ -39,16 +38,12 @@ class Item2Vec:
         """Create similarity matrix and nearest neighbours for items"""
         if train_items:
             self.valid_items = list(set(train_items) & set(self.items))
-            # print(len(self.valid_items))
             self.check_valid = [True if i in self.valid_items else False for i in train_items]
             valid_keys = [self.items.index(i) for i in self.valid_items]
             valid_embedding_matrix = self.embedding_matrix[valid_keys]
-            # print(max(valid_keys), min(valid_keys))
             self.reverse_lookup = {i:train_items.index(j) for i,j in enumerate(self.valid_items)}
-            # self.items_lookup = {i:self.valid_items.index(j) for i,j in enumerate(train_items)}            
         else:
             valid_embedding_matrix = self.embedding_matrix
 
         self.S = cosine_similarity(valid_embedding_matrix)
-        print('cosine sim average {}'.format(np.mean(self.S)))
         self.top_k = np.argsort(-self.S,axis=1)[:,1:]
